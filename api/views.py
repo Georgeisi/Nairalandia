@@ -34,7 +34,6 @@ def all_posts(request):
         paginator.page_size=5
         paginated_blogs = paginator.paginate_queryset(story, request)
         serializer = PostsSerializer(paginated_blogs, many=True)
-     
         return paginator.get_paginated_response(serializer.data)
     
 
@@ -77,6 +76,7 @@ def get_single_post(request, post_id):
     return Response(serializer.data)
 
 
+
 @api_view(['PATCH','DELETE'])
 @permission_classes([IsAuthenticated])
 def edit_post(request, id):
@@ -105,13 +105,6 @@ def edit_post(request, id):
         return Response({"message": "Post updated successfully."}, status=status.HTTP_200_OK)
 
 
-
-
-
-
-
-    # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     elif request.method == 'DELETE':
         post = Posts.objects.get(id=id)
         post.delete()
@@ -132,8 +125,11 @@ def getUserPosts(request):
 def trendingView(request):
     if request.method=='GET':
         story= Posts.objects.filter(is_trending=True)
-        serializer = PostsSerializer(story, many=True , partial=True)
-        return Response(data=serializer.data,status=status.HTTP_200_OK)
+        paginator =PageNumberPagination()
+        paginator.page_size=5
+        trends = paginator.paginate_queryset(story, request)
+        serializer = PostsSerializer(trends, many=True , partial=True)
+        return paginator.get_paginated_response(serializer.data)
 
 
 
@@ -141,30 +137,22 @@ def trendingView(request):
 def latestPosts(request):
     if request.method == 'GET':
         post = Posts.objects.all().order_by('-created_at')
-        serializer = PostsSerializer(post, many=True)
-        return Response(data=serializer.data, status=status.HTTP_200_OK)   
+        paginator =PageNumberPagination()
+        paginator.page_size=5
+        latest = paginator.paginate_queryset(post, request)
+        serializer = PostsSerializer(latest, many=True)
+        return paginator.get_paginated_response(serializer.data)  
 
+@api_view(['GET'])
+def Tags(request,tag):
+    if request.method =='GET':
+        blog_tag= Posts.objects.filter(tags=tag)
+        paginator= PageNumberPagination()
+        paginator.page_size=5
+        tagger= paginator.paginate_queryset(blog_tag,request)
+        serializer = PostsSerializer(tagger, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
-#imports all the photos and save it on the database
-
-# @api_view(['GET'])
-# def images(request):
-#     photo = Posts.objects.all()
-#     cloudinary_img = {'photo':photo}
-#     return render(request, 'photo/index', cloudinary_img)
-    
-
-
-
-
-# class ImageUploadView(APIView):
-#     def post(self, request):
-#         images = request.data.get('images', [])
-#         for image_data in images:
-           
-#             image = Posts.objects.create(image=image_data)
-
-#         return Response({'message': 'Images uploaded successfully.'})
 
 
 
