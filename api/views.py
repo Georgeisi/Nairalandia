@@ -138,7 +138,7 @@ def latestPosts(request):
     if request.method == 'GET':
         post = Posts.objects.all().order_by('-created_at')
         paginator =PageNumberPagination()
-        paginator.page_size=5
+        paginator.page_size=6
         latest = paginator.paginate_queryset(post, request)
         serializer = PostsSerializer(latest, many=True)
         return paginator.get_paginated_response(serializer.data)  

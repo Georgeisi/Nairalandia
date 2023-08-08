@@ -21,7 +21,7 @@ class Posts(models.Model):
 
 class Image(models.Model):
     post = models.ForeignKey(Posts, related_name='images', on_delete=models.CASCADE)
-    image_url = models.URLField()  # Store the public URL of the uploaded image from Cloudinary
+    image_url = models.URLField()  
 
     def __str__(self):
         return f"Image for {self.blog_post.title}"
