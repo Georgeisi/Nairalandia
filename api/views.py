@@ -9,8 +9,6 @@ from . models import Posts,Image
 from rest_framework.pagination import PageNumberPagination
 # from rest_framework.views import APIView
 import cloudinary.uploader
-import base64
-from django.core.files.base import ContentFile
 # Create your views here.
 
 @api_view(['GET'])
@@ -50,21 +48,15 @@ def create_post(request):
             blog_post = serializer.save(creator=author)
             images_data = request.data.getlist('images')
             for image_data in images_data:
-                image_data_decoded = base64.b64decode(image_data)
-
-                image_file = ContentFile(image_data_decoded, name='image.png')
-
-                # Uploading the image file to Cloudinary
                 http_request = request._request
-                cloudinary_response = cloudinary.uploader.upload(image_file, request=http_request)
+                cloudinary_response = cloudinary.uploader.upload(image_data, request=http_request)
                 image_url = cloudinary_response['secure_url']
-
-                # Creating an Image object
                 Image.objects.create(post=blog_post, image_url=image_url)
 
             return Response({'message': 'Blog post created successfully.'}, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     elif request.method == 'GET':
         blog_posts = Posts.objects.all()
         paginator =PageNumberPagination()
